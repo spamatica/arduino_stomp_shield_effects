@@ -54,6 +54,12 @@ void checkButton()
   }
 }
 
+void firstTimeInitialization()
+{
+  oldInput = input;
+  output = input;
+}
+
 void highPassFilter() // frequency unknown ;)
 {
   int filterTemp = oldFiltered + output - oldOutput;
@@ -70,38 +76,42 @@ ISR(TIMER1_OVF_vect) {
   
   checkButton();
   
-  if (inMaxVal==0) { // first time initialization;
-    oldInput = input;
-    output = input;
+  if (inMaxVal==0) {
+    firstTimeInitialization();
   }
   
-  if (input > inMaxVal)
+  if (input > inMaxVal) {
     inMaxVal++;
-  if (looper++ == 0 && input > 0 && input < inMaxVal)
+  } 
+  if (looper++ == 0 && input > 0 && input < inMaxVal) {
     inMaxVal--;
+  }
   
-  if (input < 0) // going /
+  if (input < 0) // going \
     if (oldInput >= 0)
-      currDirection = 0;
-  if (input > 0) // going \
-    if (oldInput <= 0)
-      currDirection = 1;
+      currDirection = currDirection ^ 1;
+//  if (input > 0) // going /
+//    if (oldInput <= 0)
+//      currDirection = 1;
   
   // produce output data based on currDirection
   if (currDirection)
-    output+=(counter<<5);
+    output+=(counter << 5);
   else
-    output-=(counter<<5);
+    output-=(counter << 5);
   
   //calculate gate according to current input
   //if (outGate > maxVal) outGate = outGate -10;
   //if (outGate < minVal) outGate = outGate +10;
   if (inMaxVal < 800) {
     outGate--;
-    if (outGate < 0) outGate=0;
+    if (outGate < 0) {
+      outGate=0;
+    }
   }
-  else 
+  else {
     outGate = MAX_OUT;
+  }
   
   // limit outvalue according to current gate  
   if (output < -outGate) output=-outGate;
